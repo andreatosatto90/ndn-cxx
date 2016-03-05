@@ -37,3 +37,4 @@ in the library:
 * Mickey Sweatt         <https://www.linkedin.com/in/michaelsweatt>
 * Yanbiao Li            <https://www.linkedin.com/pub/yanbiao-li/24/7a1/4ba>
 * Marcin Juszkiewicz    <http://marcin.juszkiewicz.com.pl/>
+* Andrea Tosatto        <https://linkedin.com/in/tosattoandrea>

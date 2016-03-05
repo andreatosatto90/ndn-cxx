@@ -44,6 +44,7 @@ enum ControlParameterField {
   CONTROL_PARAMETER_STRATEGY,
   CONTROL_PARAMETER_EXPIRATION_PERIOD,
   CONTROL_PARAMETER_FACE_PERSISTENCY,
+  CONTROL_PARAMETER_LOCAL_URI,
   CONTROL_PARAMETER_UBOUND
 };
 
@@ -58,6 +59,7 @@ const std::string CONTROL_PARAMETER_FIELD[CONTROL_PARAMETER_UBOUND] = {
   "Strategy",
   "ExpirationPeriod",
   "FacePersistency",
+  "LocalUri"
 };
 
 /**
@@ -191,6 +193,36 @@ public: // getters & setters
   {
     m_wire.reset();
     m_hasFields[CONTROL_PARAMETER_URI] = false;
+    return *this;
+  }
+
+  bool
+  hasLocalUri() const
+  {
+    return m_hasFields[CONTROL_PARAMETER_LOCAL_URI];
+  }
+
+  const std::string&
+  getLocalUri() const
+  {
+    BOOST_ASSERT(this->hasLocalUri());
+    return m_localUri;
+  }
+
+  ControlParameters&
+  setLocalUri(const std::string& uri)
+  {
+    m_wire.reset();
+    m_localUri = uri;
+    m_hasFields[CONTROL_PARAMETER_LOCAL_URI] = true;
+    return *this;
+  }
+
+  ControlParameters&
+  unsetLocalUri()
+  {
+    m_wire.reset();
+    m_hasFields[CONTROL_PARAMETER_LOCAL_URI] = false;
     return *this;
   }
 
@@ -416,6 +448,7 @@ private: // fields
   Name                m_name;
   uint64_t            m_faceId;
   std::string         m_uri;
+  std::string         m_localUri;
   LocalControlFeature m_localControlFeature;
   uint64_t            m_origin;
   uint64_t            m_cost;

@@ -96,11 +96,13 @@ FaceCreateCommand::FaceCreateCommand()
 {
   m_requestValidator
     .required(CONTROL_PARAMETER_URI)
-    .optional(CONTROL_PARAMETER_FACE_PERSISTENCY);
+    .optional(CONTROL_PARAMETER_FACE_PERSISTENCY)
+    .optional(CONTROL_PARAMETER_LOCAL_URI);
   m_responseValidator
     .required(CONTROL_PARAMETER_URI)
     .required(CONTROL_PARAMETER_FACE_ID)
-    .required(CONTROL_PARAMETER_FACE_PERSISTENCY);
+    .required(CONTROL_PARAMETER_FACE_PERSISTENCY)
+    .optional(CONTROL_PARAMETER_LOCAL_URI);
 }
 
 void

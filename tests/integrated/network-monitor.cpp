@@ -25,6 +25,7 @@
 
 #include "util/network-monitor.hpp"
 
+#include "util/network-interface.hpp"
 #include "util/time.hpp"
 
 #include "boost-test.hpp"
@@ -34,25 +35,70 @@
 
 namespace ndn {
 namespace util {
+namespace tests {
 
-BOOST_AUTO_TEST_SUITE(UtilNetworkMonitor)
+BOOST_AUTO_TEST_SUITE(Util)
+BOOST_AUTO_TEST_SUITE(TestNetworkMonitor)
 
-BOOST_AUTO_TEST_CASE(Basic)
+static std::ostream&
+logEvent(const shared_ptr<NetworkInterface>& ni = nullptr, std::ostream& os = std::cout)
+{
+  os << time::toString(time::system_clock::now()) << '\t';
+  if (ni != nullptr)
+    os << "[" << ni->getName() << "] ";
+  return os;
+}
+
+BOOST_AUTO_TEST_CASE(Signals)
 {
   boost::asio::io_service io;
-  BOOST_REQUIRE_NO_THROW((NetworkMonitor(io)));
-
   NetworkMonitor monitor(io);
 
   monitor.onNetworkStateChanged.connect([] {
-      std::cout << time::toString(time::system_clock::now())
-                << "\tReceived network state change event" << std::endl;
+    logEvent() << "onNetworkStateChanged" << std::endl;
+  });
+
+  monitor.onEnumerationCompleted.connect([&monitor] {
+    logEvent() << "onEnumerationCompleted" << std::endl;
+    for (const auto& ni : monitor.listNetworkInterfaces()) {
+      std::cout << *ni;
+    }
+  });
+
+  monitor.onInterfaceAdded.connect([] (const shared_ptr<NetworkInterface>& ni) {
+    logEvent(ni) << "onInterfaceAdded\n" << *ni;
+
+    ni->onAddressAdded.connect([ni] (boost::asio::ip::address address) {
+      logEvent(ni) << "onAddressAdded " << address << std::endl;
     });
+
+    ni->onAddressRemoved.connect([ni] (boost::asio::ip::address address) {
+      logEvent(ni) << "onAddressRemoved " << address << std::endl;
+    });
+
+    ni->onStateChanged.connect([ni] (NetworkInterfaceState oldState, NetworkInterfaceState newState) {
+      logEvent(ni) << "onStateChanged " << oldState << " -> " << newState << std::endl;
+    });
+
+    ni->onMtuChanged.connect([ni] (uint32_t oldMtu, uint32_t newMtu) {
+      logEvent(ni) << "onMtuChanged " << oldMtu << " -> " << newMtu << std::endl;
+    });
+
+    ni->onNameChanged.connect([ni] (std::string oldName, std::string newName) {
+      logEvent(ni) << "onNameChanged " << oldName << " -> " << newName << std::endl;
+    });
+  }); // monitor.onInterfaceAdded.connect
+
+  monitor.onInterfaceRemoved.connect([] (const shared_ptr<NetworkInterface>& ni) {
+    logEvent(ni) << "onInterfaceRemoved" << std::endl;
+  });
 
   io.run();
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END() // TestNetworkMonitor
+BOOST_AUTO_TEST_SUITE_END() // Util
 
+} // namespace tests
 } // namespace util
 } // namespace ndn
